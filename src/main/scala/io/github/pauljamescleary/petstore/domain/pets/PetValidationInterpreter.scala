@@ -1,13 +1,12 @@
-package io.github.pauljamescleary.petstore.domain.pets
+package io.github.pauljamescleary.petstore.domain
+package pets
 
-import cats._
+import cats.Applicative
 import cats.data.EitherT
 import cats.implicits._
-import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotFoundError}
 
-class PetValidationInterpreter[F[_]: Monad](repository: PetRepositoryAlgebra[F])
-    extends PetValidationAlgebra[F] {
-  
+class PetValidationInterpreter[F[_]: Applicative](repository: PetRepositoryAlgebra[F]) extends PetValidationAlgebra[F] {
+
   def doesNotExist(pet: Pet): EitherT[F, PetAlreadyExistsError, Unit] = EitherT {
     repository.findByNameAndCategory(pet.name, pet.category).map { matches =>
       if (matches.forall(possibleMatch => possibleMatch.bio != pet.bio)) {
@@ -35,6 +34,6 @@ class PetValidationInterpreter[F[_]: Monad](repository: PetRepositoryAlgebra[F])
 }
 
 object PetValidationInterpreter {
-  def apply[F[_]: Monad](repository: PetRepositoryAlgebra[F]) =
+  def apply[F[_]: Applicative](repository: PetRepositoryAlgebra[F]) =
     new PetValidationInterpreter[F](repository)
 }

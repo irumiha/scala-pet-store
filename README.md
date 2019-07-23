@@ -8,10 +8,9 @@ Special thank you to [Zak Patterson](https://github.com/zakpatterson) who also m
 # Status
 I have most of the endpoints in place.  There are few big pieces remaining in case y'all want to lend a hand:
 
-1. Use TSec to add login / authentication using JWT
-2. Create a ScalaJS React front end
-3. Build tests using scala check in an idiomatic sane way
-4. Create a microsite documenting the patterns in the pet store.  Kind of a mini-book
+1. Create a ScalaJS React front end
+2. Build tests using scala check in an idiomatic sane way
+3. Create a microsite documenting the patterns in the pet store.  Kind of a mini-book
 
 # Want to help out?
 [Join the chat at Scala Pet Store gitter.im](https://gitter.im/scala-pet-store/scala-pet-store)
@@ -81,7 +80,7 @@ The infrastructure package is where the ugliness lives.  It has HTTP things, JDB
 1. `repository` - contains the JDBC code, implementations of our `Repositories`.  We have 2 implementations, an in-memory version as well as a **doobie** version.
 
 **The config package**
-The config package could be considered infrastructure, as it has nothing to do with the domain.  We use **Pure Config** to load configuration objects when the application starts up.  **pure config** Provides a neat mapping of config file to case classes for us, so we really do not have to do any code.  **pure config cats effect** is a little library that allows us to load the config in some effect type (to handle the fact that configuration loading could fail).
+The config package could be considered infrastructure, as it has nothing to do with the domain.  We use **Circe Config** to load configuration objects when the application starts up.  **circe config** Provides a neat mapping of config file to case classes for us, so we really do not have to do any code. 
 
 ### What about dependency injection?
 The pet store does currently use `classes` for certain things (some would argue this isn't very FP).  There are lots of ways to do dependency injection, including function arguments, implicits, and monad transformers.  Using _class constructors_ is rather OO like, but I believe this is simpler for people with OO backgrounds to digest.
@@ -133,7 +132,7 @@ Building out a test suite using Python.  The reason is that typically we want to
 when we deploy our code in order to make sure that everything is running properly in the target environment.  It
 is reassuring to know that your code works across clients.
 
-In order to run the functional tests, your machine will need to have Python 2.7 and pip, and virtualenv.
+In order to run the functional tests, your machine will need to have Python 3 and pip, and virtualenv.
 
 1. To install pip on a Mac, run `sudo easy_install pip`
 2. Then install virutalenv `sudo pip install virtualenv`

@@ -1,18 +1,20 @@
 language: scala
-
+dist: xenial
 scala:
-   - 2.12.6
-   
-python:
-  - "2.7"
+   - 2.12.8
+   - 2.13.0
 
 jobs:
   include:
-    - stage: verify
-
       before_script:
         - sbt stage
 
       script:
         - sbt ++$TRAVIS_SCALA_VERSION test
         - ./build.sh
+
+cache:
+  directories:
+    - "$HOME/.coursier/cache"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt/boot"

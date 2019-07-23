@@ -1,4 +1,5 @@
-package io.github.pauljamescleary.petstore.infrastructure.repository.inmemory
+package io.github.pauljamescleary.petstore
+package infrastructure.repository.inmemory
 
 import scala.collection.concurrent.TrieMap
 import scala.util.Random
@@ -6,10 +7,9 @@ import scala.util.Random
 import cats._
 import cats.data.NonEmptyList
 import cats.implicits._
-import io.github.pauljamescleary.petstore.domain.pets.{Pet, PetRepositoryAlgebra, PetStatus}
+import domain.pets.{Pet, PetRepositoryAlgebra, PetStatus}
 
 class PetRepositoryInMemoryInterpreter[F[_]: Applicative] extends PetRepositoryAlgebra[F] {
-
   private val cache = new TrieMap[Long, Pet]
 
   private val random = new Random
@@ -42,8 +42,10 @@ class PetRepositoryInMemoryInterpreter[F[_]: Applicative] extends PetRepositoryA
   def findByStatus(statuses: NonEmptyList[PetStatus]): F[List[Pet]] =
     cache.values.filter(p => statuses.exists(_ == p.status)).toList.pure[F]
 
-  def findByTag(tags: NonEmptyList[String]): F[List[Pet]] =
-    cache.values.filter(p => tags.exists(_ == p.tags)).toList.pure[F]
+  def findByTag(tags: NonEmptyList[String]): F[List[Pet]] = {
+    val tagSet = tags.toNes
+    cache.values.filter(_.tags.exists(tagSet.contains(_))).toList.pure[F]
+  }
 }
 
 object PetRepositoryInMemoryInterpreter {

@@ -1,10 +1,10 @@
-package io.github.pauljamescleary.petstore.domain.pets
+package io.github.pauljamescleary.petstore.domain
+package pets
 
-import scala.language.higherKinds
-
-import cats._
+import cats.Functor
 import cats.data._
-import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotFoundError}
+import cats.Monad
+import cats.syntax.all._
 
 /**
   * The entry point to our domain, works with repositories and validations to implement behavior
@@ -13,8 +13,10 @@ import io.github.pauljamescleary.petstore.domain.{PetAlreadyExistsError, PetNotF
   * @tparam F - this is the container for the things we work with, could be scala.concurrent.Future, Option, anything
   *           as long as it is a Monad
   */
-class PetService[F[_]](repository: PetRepositoryAlgebra[F], validation: PetValidationAlgebra[F]) {
-  import cats.syntax.all._
+class PetService[F[_]](
+  repository: PetRepositoryAlgebra[F],
+  validation: PetValidationAlgebra[F]
+) {
 
   def create(pet: Pet)(implicit M: Monad[F]): EitherT[F, PetAlreadyExistsError, Pet] = for {
     _ <- validation.doesNotExist(pet)
@@ -27,11 +29,11 @@ class PetService[F[_]](repository: PetRepositoryAlgebra[F], validation: PetValid
     saved <- EitherT.fromOptionF(repository.update(pet), PetNotFoundError)
   } yield saved
 
-  def get(id: Long)(implicit M: Monad[F]): EitherT[F, PetNotFoundError.type, Pet] =
+  def get(id: Long)(implicit F: Functor[F]): EitherT[F, PetNotFoundError.type, Pet] =
     EitherT.fromOptionF(repository.get(id), PetNotFoundError)
 
   /* In some circumstances we may care if we actually delete the pet; here we are idempotent and do not care */
-  def delete(id: Long)(implicit M: Monad[F]): F[Unit] =
+  def delete(id: Long)(implicit F: Functor[F]): F[Unit] =
     repository.delete(id).as(())
 
   def list(pageSize: Int, offset: Int): F[List[Pet]] =
@@ -45,6 +47,6 @@ class PetService[F[_]](repository: PetRepositoryAlgebra[F], validation: PetValid
 }
 
 object PetService {
-  def apply[F[_]: Monad](repository: PetRepositoryAlgebra[F], validation: PetValidationAlgebra[F]) =
+  def apply[F[_]](repository: PetRepositoryAlgebra[F], validation: PetValidationAlgebra[F]): PetService[F] =
     new PetService[F](repository, validation)
 }

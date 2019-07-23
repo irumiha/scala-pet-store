@@ -1,8 +1,9 @@
-package io.github.pauljamescleary.petstore.infrastructure.repository
+package io.github.pauljamescleary.petstore
+package infrastructure.repository
 
 import cats.implicits._
 import cats.effect.{Async, ContextShift, Effect, IO}
-import io.github.pauljamescleary.petstore.config._
+import config._
 import _root_.doobie.Transactor
 import io.circe.config.parser
 
@@ -11,8 +12,8 @@ import scala.concurrent.ExecutionContext
 package object doobie {
   def getTransactor[F[_] : Async : ContextShift](cfg : DatabaseConfig) : Transactor[F] =
     Transactor.fromDriverManager[F](
-      cfg.driver, // driver classname
-      cfg.url, // connect URL (driver-specific)
+      cfg.driver,            // driver classname
+      cfg.url,               // connect URL (driver-specific)
       cfg.user,              // user
       cfg.password           // password
     )

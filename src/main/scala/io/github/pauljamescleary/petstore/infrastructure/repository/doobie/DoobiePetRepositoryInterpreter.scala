@@ -1,12 +1,13 @@
-package io.github.pauljamescleary.petstore.infrastructure.repository.doobie
+package io.github.pauljamescleary.petstore
+package infrastructure.repository.doobie
 
-import cats._
 import cats.data._
 import cats.implicits._
 import doobie._
 import doobie.implicits._
-import io.github.pauljamescleary.petstore.domain.pets.{Pet, PetRepositoryAlgebra, PetStatus}
+import domain.pets.{Pet, PetRepositoryAlgebra, PetStatus}
 import SQLPagination._
+import cats.effect.Bracket
 
 private object PetSQL {
   /* We require type StatusMeta to handle our ADT Status */
@@ -70,8 +71,8 @@ private object PetSQL {
   }
 }
 
-class DoobiePetRepositoryInterpreter[F[_]: Monad](val xa: Transactor[F])
-    extends PetRepositoryAlgebra[F] {
+class DoobiePetRepositoryInterpreter[F[_]: Bracket[?[_], Throwable]](val xa: Transactor[F])
+extends PetRepositoryAlgebra[F] {
   import PetSQL._
 
   def create(pet: Pet): F[Pet] =
@@ -101,6 +102,6 @@ class DoobiePetRepositoryInterpreter[F[_]: Monad](val xa: Transactor[F])
 }
 
 object DoobiePetRepositoryInterpreter {
-  def apply[F[_]: Monad](xa: Transactor[F]): DoobiePetRepositoryInterpreter[F] =
+  def apply[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]): DoobiePetRepositoryInterpreter[F] =
     new DoobiePetRepositoryInterpreter(xa)
 }
